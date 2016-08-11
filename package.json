@@ -2,8 +2,7 @@
     "name": "console-log-store",
     "version": "1.0.0",
     "description": "Store console log messages",
-    "main": "js/index.js",
-    "typings": "js/index",
+    "main": "dist/console-log-store.min.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build:tsc": "cd src && tsc",
@@ -27,7 +26,7 @@
     "bugs": {
         "url": "https://github.com/vbraun/console-log-store/issues"
     },
-    "homepage": "https://github.com/vbraun/console-log-store#readme",
+    "homepage": "https://github.com/vbraun/console-log-store",
     "devDependencies": {
         "babel-cli": "^6.11.4",
         "babel-preset-es2015": "^6.13.2",
