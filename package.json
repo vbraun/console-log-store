@@ -1,6 +1,6 @@
 {
     "name": "console-log-store",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Store console log messages",
     "main": "dist/console-log-store.min.js",
     "scripts": {

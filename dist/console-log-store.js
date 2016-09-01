@@ -92,7 +92,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
 
                 var message = args.map(function (arg) {
-                    return arg.toString();
+                    return String(arg);
                 }).join(' ');
                 this.buffer.push({
                     level: LogLevel[level],

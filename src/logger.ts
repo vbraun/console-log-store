@@ -85,7 +85,7 @@ export class Logger {
 
     private storeLogMessage(level: LogLevel, ...args): void {
         const message: string = args.map(
-            (arg) => arg.toString()
+            (arg) => String(arg)
         ).join(' ');
         this.buffer.push({
             level: LogLevel[level],
