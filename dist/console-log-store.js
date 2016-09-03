@@ -1,5 +1,7 @@
 "use strict";
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -85,14 +87,39 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.buffer = [];
             }
         }, {
+            key: "stringify",
+            value: function stringify(obj) {
+                if (typeof obj === 'string') return obj;
+                var str = String(obj);
+                if (str !== '[object Object]') return str;
+                var cache = [];
+                var limit = 20;
+                var count = 0;
+                var json = JSON.stringify(obj, function (key, value) {
+                    count += 1;
+                    if (count >= limit) return;
+                    if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === 'object' && value !== null) {
+                        if (cache.indexOf(value) !== -1) {
+                            return '[Circular]';
+                        }
+                        cache.push(value);
+                    }
+                    return value;
+                });
+                if (count < limit) return json;
+                return json + (" (" + (count - limit) + " values discarded)");
+            }
+        }, {
             key: "storeLogMessage",
             value: function storeLogMessage(level) {
+                var _this2 = this;
+
                 for (var _len6 = arguments.length, args = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
                     args[_key6 - 1] = arguments[_key6];
                 }
 
                 var message = args.map(function (arg) {
-                    return String(arg);
+                    return _this2.stringify(arg);
                 }).join(' ');
                 this.buffer.push({
                     level: LogLevel[level],

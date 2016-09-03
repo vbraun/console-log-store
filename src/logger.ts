@@ -83,9 +83,38 @@ export class Logger {
         this.storeLogMessage(LogLevel.DEFAULT, ...args);
     }
 
+    private stringify(obj: any): string {
+        // Return strings unchanged
+        if (typeof obj === 'string')
+            return obj;
+        // Hope that there is a useful obj.toString() method
+        const str = String(obj);
+        if (str !== '[object Object]')
+            return str;
+        // Use JSON.stringify but handle circular references
+        const cache = [];
+        const limit = 20;
+        let count = 0;
+        const json = JSON.stringify(obj, function(key, value) {
+            count += 1;
+            if (count >= limit)
+                return;
+            if (typeof value === 'object' && value !== null) {
+                if (cache.indexOf(value) !== -1) {
+                    return '[Circular]';
+                }
+                cache.push(value);
+            }
+            return value;
+        });
+        if (count < limit)
+            return json;
+        return json + ` (${count-limit} values discarded)`;
+    }
+    
     private storeLogMessage(level: LogLevel, ...args): void {
         const message: string = args.map(
-            (arg) => String(arg)
+            (arg) => this.stringify(arg)
         ).join(' ');
         this.buffer.push({
             level: LogLevel[level],
