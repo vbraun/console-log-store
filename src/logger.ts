@@ -9,6 +9,9 @@ export interface LogEntry {
 }
 
 
+export type LogListener = (LogEntry) => void;
+
+
 const BUFFER_LENGTH_LIMIT: number = 100;
 
 
@@ -19,6 +22,8 @@ export class Logger {
      */
     private buffer: LogEntry[];
 
+    private listener: LogListener;
+    
     private console: Console;
     private consoleLog: (...args) => void;
     private consoleDebug: (...args) => void;
@@ -50,6 +55,10 @@ export class Logger {
         return logger;
     }
 
+    public setListener(callback: LogListener) {
+        this.listener = callback;
+    }
+    
     public list(): LogEntry[] {
         return this.buffer;
     }
@@ -85,12 +94,18 @@ export class Logger {
 
     private stringify(obj: any): string {
         // Return strings unchanged
-        if (typeof obj === 'string')
+        const isString = (typeof obj === 'string');
+        if (isString)
             return obj;
         // Hope that there is a useful obj.toString() method
-        const str = String(obj);
-        if (str !== '[object Object]')
-            return str;
+        // Array.toString() sucks and is excluded
+        const isObject = (typeof obj === 'object');
+        const isArray = (isObject && obj.constructor === Array);
+        if (isObject && !isArray) {
+            const str = String(obj);
+            if (str !== '[object Object]')
+                return str;
+        }
         // Use JSON.stringify but handle circular references
         const cache = [];
         const limit = 20;
@@ -116,11 +131,14 @@ export class Logger {
         const message: string = args.map(
             (arg) => this.stringify(arg)
         ).join(' ');
-        this.buffer.push({
+        const entry: LogEntry = {
             level: LogLevel[level],
             date: new Date(),
             message: message,
-        });
+        }
+        this.buffer.push(entry);
+        if (this.listener)
+            this.listener(entry);
         if (this.buffer.length > BUFFER_LENGTH_LIMIT) {
             this.buffer.splice(0, 10);
         }

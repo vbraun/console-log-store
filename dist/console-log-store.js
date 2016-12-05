@@ -77,6 +77,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         _createClass(Logger, [{
+            key: "setListener",
+            value: function setListener(callback) {
+                this.listener = callback;
+            }
+        }, {
             key: "list",
             value: function list() {
                 return this.buffer;
@@ -89,9 +94,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "stringify",
             value: function stringify(obj) {
-                if (typeof obj === 'string') return obj;
-                var str = String(obj);
-                if (str !== '[object Object]') return str;
+                var isString = typeof obj === 'string';
+                if (isString) return obj;
+                var isObject = (typeof obj === "undefined" ? "undefined" : _typeof(obj)) === 'object';
+                var isArray = isObject && obj.constructor === Array;
+                if (isObject && !isArray) {
+                    var str = String(obj);
+                    if (str !== '[object Object]') return str;
+                }
                 var cache = [];
                 var limit = 20;
                 var count = 0;
@@ -121,11 +131,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var message = args.map(function (arg) {
                     return _this2.stringify(arg);
                 }).join(' ');
-                this.buffer.push({
+                var entry = {
                     level: LogLevel[level],
                     date: new Date(),
                     message: message
-                });
+                };
+                this.buffer.push(entry);
+                if (this.listener) this.listener(entry);
                 if (this.buffer.length > BUFFER_LENGTH_LIMIT) {
                     this.buffer.splice(0, 10);
                 }
