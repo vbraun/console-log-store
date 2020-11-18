@@ -99,7 +99,7 @@ export class Logger {
             return obj;
         // Hope that there is a useful obj.toString() method
         // Array.toString() sucks and is excluded
-        const isObject = (typeof obj === 'object');
+        const isObject = (obj instanceof Object);
         const isArray = (isObject && obj.constructor === Array);
         if (isObject && !isArray) {
             const str = String(obj);
@@ -124,18 +124,30 @@ export class Logger {
         });
         if (count < limit)
             return json;
-        return json + ` (${count-limit} values discarded)`;
+        return json + ` (${count - limit} values discarded)`;
+    }
+
+    private stringifySafe(obj: any): string {
+        try {
+            return this.stringify(obj);
+        } catch (error) {
+            // Rarely stringify can raise,
+            // e.g. stringify(window.document) can throw a
+            // DOMException: Blocked a frame with origin "..." from
+            // accessing a cross-origin frame
+            return 'stringify failed: ' + error.toString();
+        }
     }
     
     private storeLogMessage(level: LogLevel, ...args): void {
         const message: string = args.map(
-            (arg) => this.stringify(arg)
+            (arg) => this.stringifySafe(arg)
         ).join(' ');
         const entry: LogEntry = {
             level: LogLevel[level],
             date: new Date(),
             message: message,
-        }
+        };
         this.buffer.push(entry);
         if (this.listener)
             this.listener(entry);

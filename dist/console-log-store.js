@@ -96,7 +96,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function stringify(obj) {
                 var isString = typeof obj === 'string';
                 if (isString) return obj;
-                var isObject = (typeof obj === "undefined" ? "undefined" : _typeof(obj)) === 'object';
+                var isObject = obj instanceof Object;
                 var isArray = isObject && obj.constructor === Array;
                 if (isObject && !isArray) {
                     var str = String(obj);
@@ -120,6 +120,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return json + (" (" + (count - limit) + " values discarded)");
             }
         }, {
+            key: "stringifySafe",
+            value: function stringifySafe(obj) {
+                try {
+                    return this.stringify(obj);
+                } catch (error) {
+                    return 'stringify failed: ' + error.toString();
+                }
+            }
+        }, {
             key: "storeLogMessage",
             value: function storeLogMessage(level) {
                 var _this2 = this;
@@ -129,7 +138,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
 
                 var message = args.map(function (arg) {
-                    return _this2.stringify(arg);
+                    return _this2.stringifySafe(arg);
                 }).join(' ');
                 var entry = {
                     level: LogLevel[level],
